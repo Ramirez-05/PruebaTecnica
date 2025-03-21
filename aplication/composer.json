@@ -1,0 +1,19 @@
+{
+    "name": "xyz/prueba-tecnica",
+    "description": "Proyecto de prueba técnica para XYZ que demuestra habilidades en desarrollo PHP.",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Xyz\\PruebaTecnica\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Santiago Ramirez Cardona",
+            "email": "ramirezcardona2204@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
