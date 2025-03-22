@@ -17,7 +17,8 @@
     "minimum-stability": "stable",
     "require": {
         "illuminate/database": "^12.3",
-        "vlucas/phpdotenv": "^5.6"
+        "vlucas/phpdotenv": "^5.6",
+        "pecee/simple-router": "^5.4"
     },
     "scripts": {
         "connection": [

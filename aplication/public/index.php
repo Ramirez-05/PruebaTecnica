@@ -2,5 +2,9 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// Se inicia el orm y la db
-Core\Database::init();
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..'); 
+$dotenv->load();
+
+Xyz\PruebaTecnica\Core\Database::init();
+
+require __DIR__ . '/../src/Routes/Api.php'; 
