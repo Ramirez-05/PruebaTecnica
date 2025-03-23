@@ -10,13 +10,15 @@ class ClientController
     // Crear un nuevo cliente
     public function store($data)
     {
-        if (empty($data['name']) || empty($data['email'])) {
+        if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
             throw new Exception('Todos los campos son obligatorios.'); 
         }
 
         if (Client::where('email', $data['email'])->exists()) {
             throw new Exception('El correo electrónico ya está registrado.'); 
         }
+
+        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
         return Client::create($data);
     }
@@ -46,13 +48,18 @@ class ClientController
         }
 
         $client = Client::find($id);
- 
+
         if (!$client) {
             throw new Exception('Cliente no encontrado.'); 
         }
 
         if (Client::where('email', $data['email'])->where('id', '!=', $id)->exists()) { 
             throw new Exception('El correo electrónico ya está registrado.');
+        }
+
+        // Si se proporciona una nueva contraseña, hashearla
+        if (!empty($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
 
         $client->update($data); 
