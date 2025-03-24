@@ -2,105 +2,123 @@
 
 namespace Xyz\PruebaTecnica\Controllers;
 
-use Xyz\PruebaTecnica\Models\Client;
+use Xyz\PruebaTecnica\Services\ClientService;
+use Xyz\PruebaTecnica\Services\ResponseService;
 use Exception;
 
 class ClientController
 {
-    // Crear un nuevo cliente
-    public function store($data)
-    {
-        if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
-            throw new Exception('Todos los campos son obligatorios.'); 
-        }
+    private $clientService;
+    private $responseService;
 
-        if (Client::where('email', $data['email'])->exists()) {
-            throw new Exception('El correo electrónico ya está registrado.'); 
-        }
-
-        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-
-        return Client::create($data);
+    /**
+     * Constructor with dependency injection
+     * 
+     * @param ClientService $clientService
+     * @param ResponseService $responseService
+     */
+    public function __construct(
+        ClientService $clientService,
+        ResponseService $responseService
+    ) {
+        $this->clientService = $clientService;
+        $this->responseService = $responseService;
     }
 
-    // Obtener un cliente por ID
+    /**
+     * Create a new client
+     * 
+     * @return void
+     */
+    public function create()
+    {
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $client = $this->clientService->store($data);
+            
+            return $this->responseService->success($client, 201);
+        } catch (Exception $e) {
+            return $this->responseService->error($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * Get a client by ID
+     * 
+     * @param int $id
+     * @return void
+     */
     public function show($id)
     {
-        $client = Client::find($id);
-        if (!$client) {
-            throw new Exception('Cliente no encontrado.');
+        try {
+            $client = $this->clientService->show($id);
+            
+            return $this->responseService->success($client);
+        } catch (Exception $e) {
+            return $this->responseService->error($e->getMessage(), 404);
         }
-
-        return $client;
     }
 
-    // Obtener todos los clientes
+    /**
+     * Get all clients
+     * 
+     * @return void
+     */
     public function index() 
     {
-        return Client::all(); 
+        try {
+            $clients = $this->clientService->index();
+            
+            return $this->responseService->success($clients);
+        } catch (Exception $e) {
+            return $this->responseService->error($e->getMessage(), 500);
+        }
     }
 
-    // Actualizar un cliente
-    public function update($id, $data)
+    /**
+     * Update a client
+     * 
+     * @param int $id
+     * @return void
+     */
+    public function update($id)
     {
-        $client = Client::find($id);
-
-        if (!$client) {
-            throw new Exception('Cliente no encontrado.'); 
-        }
-
-        $id = (int)$id;
-        $updated = false;
-
-        if (isset($data['email'])) {
-            if (empty($data['email'])) {
-                throw new Exception('El correo electrónico es obligatorio.'); 
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $client = $this->clientService->update($id, $data);
+            
+            return $this->responseService->success($client);
+        } catch (Exception $e) {
+            $statusCode = 500;
+            
+            if (str_contains($e->getMessage(), 'no encontrado')) {
+                $statusCode = 404;
+            } elseif (str_contains($e->getMessage(), 'ya está registrado') || str_contains($e->getMessage(), 'obligatorio')) {
+                $statusCode = 400;
             }
             
-            $existingClient = Client::where('email', $data['email'])->first();
-            if ($existingClient && $existingClient->id !== $id) { 
-                throw new Exception('El correo electrónico ya está registrado por otro usuario.');
-            }
-
-            $client->email = $data['email'];
-            $updated = true;
+            return $this->responseService->error($e->getMessage(), $statusCode);
         }
-
-        if (isset($data['name'])) {
-            if (empty($data['name'])) {
-                throw new Exception('El nombre es obligatorio.'); 
-            }
-            
-            $client->name = $data['name'];
-            $updated = true;
-        }
-
-        if ($updated) {
-            $client->save();
-            $client = Client::find($id);
-            
-            if (isset($data['email']) && $client->email !== $data['email']) {
-                throw new Exception('No se pudo actualizar el correo electrónico.');
-            }
-            
-            if (isset($data['name']) && $client->name !== $data['name']) {
-                throw new Exception('No se pudo actualizar el nombre.');
-            }
-        }
-
-        return $client;
     }
 
-    // Eliminar un cliente
+    /**
+     * Delete a client
+     * 
+     * @param int $id
+     * @return void
+     */
     public function destroy($id)
     {
-        $client = Client::find($id); 
-
-        if (!$client) {
-            throw new Exception('Cliente no encontrado.'); 
+        try {
+            $result = $this->clientService->destroy($id);
+            
+            return $this->responseService->success(['message' => 'Cliente eliminado correctamente']);
+        } catch (Exception $e) {
+            return $this->responseService->error($e->getMessage(), 
+                str_contains($e->getMessage(), 'no encontrado') ? 404 : 500
+            );
         }
-
-        $client->delete(); 
-        return true;
     }
 }

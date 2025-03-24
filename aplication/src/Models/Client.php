@@ -14,4 +14,9 @@ class Client extends Model
     {
         return password_verify($password, $this->password);
     }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'client_product', 'client_id', 'product_id');
+    }
 }

@@ -6,15 +6,12 @@ use Xyz\PruebaTecnica\Middlewares\AuthMiddleware;
 $clientController = new ClientController();
 $authMiddleware = new AuthMiddleware();
 
-// Rutas protegidas con autenticación
 Router::group(['middleware' => [$authMiddleware]], function() use ($clientController) {
     
-    // Obtener todos los clientes
     Router::get('/clients', function() use ($clientController) {
         echo json_encode($clientController->index());
     });
 
-    // Obtener un cliente por ID
     Router::get('/clients/{id}', function($id) use ($clientController) {
         try {
             echo json_encode($clientController->show($id));
@@ -24,7 +21,6 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
         }
     });
 
-    // Crear un nuevo cliente
     Router::post('/clients', function() use ($clientController) {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
@@ -40,7 +36,6 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
         }
     });
 
-    // Actualizar un cliente
     Router::put('/clients/{id}', function ($id) use ($clientController) {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
@@ -51,7 +46,6 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
             
             $updateData = [];
             
-            // Validar email si está presente
             if (isset($data['email'])) {
                 $updateData['email'] = trim($data['email']); 
                 
@@ -60,7 +54,6 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
                 }
             }
             
-            // Validar nombre si está presente
             if (isset($data['name'])) {
                 $updateData['name'] = trim($data['name']);
                 
@@ -69,7 +62,6 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
                 }
             }
             
-            // Asegurarse de que al menos un campo se va a actualizar
             if (empty($updateData)) {
                 throw new Exception('No se especificaron campos para actualizar.');
             }
@@ -83,8 +75,7 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
             echo json_encode(['error' => $e->getMessage()]);
         }
     });
-    
-    // Eliminar un cliente
+
     Router::delete('/clients/{id}', function ($id) use ($clientController) {
         try {
             $result = $clientController->destroy($id);
