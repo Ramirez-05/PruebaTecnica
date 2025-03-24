@@ -2,12 +2,14 @@
 
 namespace Xyz\PruebaTecnica\Middlewares;
 
+use Pecee\Http\Middleware\IMiddleware;
+use Pecee\Http\Request;
 use Xyz\PruebaTecnica\Core\JwtService;
 use Exception;
 
-class AuthMiddleware
+class AuthMiddleware implements IMiddleware
 {
-    public function handle()
+    public function handle(Request $request): void
     {
         $headers = getallheaders();
         $authHeader = $headers['Authorization'] ?? '';

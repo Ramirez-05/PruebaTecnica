@@ -8,20 +8,35 @@ use Exception;
 
 class AuthController
 {
-    public function login($credentials)
+    public function login()
     {
-        if (empty($credentials['email']) || empty($credentials['password'])) {
-            throw new Exception('El email y la contraseña son obligatorios.');
-        }
+        try {
+            // Obtener datos del request
+            $data = json_decode(file_get_contents('php://ut'), true);
+            
+            // Validar campos obligatorios
+            if (empty($data['email']) || empty($data['password'])) {
+                http_response_code(400);
+                return ['error' => 'Email y contraseña son obligatorios'];
+            }
 
-        $client = Client::where('email', $credentials['email'])->first();
-        
-        if (!$client || !$client->verifyPassword($credentials['password'])) {
-            throw new Exception('Credenciales inválidas.');
-        }
+            // Buscar cliente
+            $client = Client::where('email', $data['email'])->first();
+            
+            if (!$client || !$client->verifyPassword($data['password'])) {
+                http_response_code(401);
+                return ['error' => 'Credenciales inválidas'];
+            }
 
-        // Generar el token JWT
-        $token = JwtService::generateToken($client->id);
-        return ['token' => $token];
+            // Generar y retornar token
+            return [
+                'token' => JwtService::generateToken($client->id),
+                'user_id' => $client->id
+            ];
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            return ['error' => 'Error en el servidor: ' . $e->getMessage()];
+        }
     }
 }
