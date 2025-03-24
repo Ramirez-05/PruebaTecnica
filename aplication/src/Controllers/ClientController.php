@@ -43,26 +43,51 @@ class ClientController
     // Actualizar un cliente
     public function update($id, $data)
     {
-        if (empty($data['name']) || empty($data['email'])) {
-            throw new Exception('Todos los campos son obligatorios.'); 
-        }
-
         $client = Client::find($id);
 
         if (!$client) {
             throw new Exception('Cliente no encontrado.'); 
         }
 
-        if (Client::where('email', $data['email'])->where('id', '!=', $id)->exists()) { 
-            throw new Exception('El correo electrónico ya está registrado.');
+        $id = (int)$id;
+        $updated = false;
+
+        if (isset($data['email'])) {
+            if (empty($data['email'])) {
+                throw new Exception('El correo electrónico es obligatorio.'); 
+            }
+            
+            $existingClient = Client::where('email', $data['email'])->first();
+            if ($existingClient && $existingClient->id !== $id) { 
+                throw new Exception('El correo electrónico ya está registrado por otro usuario.');
+            }
+
+            $client->email = $data['email'];
+            $updated = true;
         }
 
-        // Si se proporciona una nueva contraseña, hashearla
-        if (!empty($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        if (isset($data['name'])) {
+            if (empty($data['name'])) {
+                throw new Exception('El nombre es obligatorio.'); 
+            }
+            
+            $client->name = $data['name'];
+            $updated = true;
         }
 
-        $client->update($data); 
+        if ($updated) {
+            $client->save();
+            $client = Client::find($id);
+            
+            if (isset($data['email']) && $client->email !== $data['email']) {
+                throw new Exception('No se pudo actualizar el correo electrónico.');
+            }
+            
+            if (isset($data['name']) && $client->name !== $data['name']) {
+                throw new Exception('No se pudo actualizar el nombre.');
+            }
+        }
+
         return $client;
     }
 

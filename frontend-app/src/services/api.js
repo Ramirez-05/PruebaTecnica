@@ -10,26 +10,19 @@ const api = axios.create({
   }
 });
 
-console.log('API: Configurando axios con URL base:', API_BASE_URL);
-
 // Interceptor para manejar tokens de autenticación
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');
-    console.log('API Interceptor: Preparando petición a:', config.url);
-    
     if (token) {
       console.log('API Interceptor: Token encontrado, añadiendo a headers');
       config.headers['Authorization'] = `Bearer ${token}`;
     } else {
       console.log('API Interceptor: No hay token disponible');
     }
-    
-    console.log('API Interceptor: Configuración final de la petición:', config);
     return config;
   },
   error => {
-    console.error('API Interceptor: Error en la configuración de la petición:', error);
     return Promise.reject(error);
   }
 );
@@ -37,17 +30,22 @@ api.interceptors.request.use(
 // Interceptor para manejar errores comunes
 api.interceptors.response.use(
   response => {
-    console.log('API Response Interceptor: Respuesta exitosa de:', response.config.url);
+    if (typeof response.data === 'string' && response.data.endsWith('null')) {
+      try {
+        response.data = JSON.parse(response.data.replace(/null$/, ''));
+      } catch (e) {
+        console.error('API Response Interceptor: Error al limpiar datos:', e);
+      }
+    }
+    
     return response;
   },
   error => {
-    console.error('API Response Interceptor: Error en la respuesta:', error);
     
     if (error.response) {
-      console.error('API Response Interceptor: Estado HTTP:', error.response.status);
-      
-      if (error.response.status === 401) {
-        console.warn('API Response Interceptor: Error 401 Unauthorized - Redirigiendo a login');
+      if (error.response.status === 401 && 
+          !window.location.pathname.includes('/login') &&
+          !window.location.pathname.includes('/register')) {
         localStorage.removeItem('token');
         window.location.href = '/login';
       }

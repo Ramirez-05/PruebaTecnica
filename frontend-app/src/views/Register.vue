@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import AuthService from '../services/auth.service';
+import { useAuthStore } from '../store/authStore';
 
 export default {
   name: 'Register',
@@ -60,21 +60,26 @@ export default {
         email: '',
         password: ''
       },
-      loading: false,
       message: '',
       isError: false
     };
   },
+  computed: {
+    authStore() {
+      return useAuthStore();
+    },
+    loading() {
+      return this.authStore.loading;
+    }
+  },
   methods: {
     async handleRegister() {
-      // Validación manual de campos
       if (!this.user.email || !this.user.password) {
         this.message = 'Por favor, complete todos los campos';
         this.isError = true;
         return;
       }
       
-      // Validación adicional del email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(this.user.email)) {
         this.message = 'Por favor, ingrese un email válido';
@@ -82,39 +87,26 @@ export default {
         return;
       }
       
-      // Validación básica de seguridad de contraseña
       if (this.user.password.length < 6) {
         this.message = 'La contraseña debe tener al menos 6 caracteres';
         this.isError = true;
         return;
       }
       
-      this.loading = true;
       this.message = '';
       
       try {
-        await AuthService.register(this.user.email, this.user.password);
+        await this.authStore.register(this.user.email, this.user.password);
         this.message = 'Registro exitoso. Redirigiendo al login...';
         this.isError = false;
-        
-        console.log('Register Component: Registro exitoso, redirigiendo en 2 segundos');
         
         setTimeout(() => {
           this.$router.push('/login');
         }, 2000);
       } catch (error) {
         this.isError = true;
-        console.error('Register Component: Error durante el registro:', error);
-        
-        if (error.response) {
-          this.message = error.response.data.message || 'Error en el registro';
-          console.error('Register Component: Mensaje de error del servidor:', error.response.data);
-        } else {
-          this.message = 'Error de conexión con el servidor';
-          console.error('Register Component: Error:', error);
-        }
-      } finally {
-        this.loading = false;
+        this.message = error.message || 'Error en el registro';
+        this.user.password = '';
       }
     }
   }

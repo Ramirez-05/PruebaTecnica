@@ -1,17 +1,32 @@
 <script>
 import Nav from './components/Nav.vue'
+import AuthNav from './components/AuthNav.vue'
+import { useAuthStore } from './store/authStore'
 
 export default {
   name: 'App',
   components: {
-    Nav
+    Nav,
+    AuthNav
+  },
+  computed: {
+    authStore() {
+      return useAuthStore();
+    },
+    isAuthenticated() {
+      return this.authStore.isAuthenticated;
+    }
+  },
+  created() {
+    this.authStore.initializeFromStorage();
   }
 }
 </script>
 
 <template>
   <div class="min-h-screen bg-stone-200 bg-opacity-90 bg-[url('/wood-texture.jpg')] bg-blend-overlay">
-    <Nav />
+    <AuthNav v-if="isAuthenticated" />
+    <Nav v-else />
     <main class="relative">
       <router-view></router-view>
     </main>
@@ -27,5 +42,5 @@ export default {
   --color-bark: #5D4037;
   --color-moss: #708D23;
   --color-ground: #79553D;
-}
+} 
 </style>

@@ -40,17 +40,13 @@
           <span v-if="loading">Iniciando sesión...</span>
           <span v-else>Iniciar Sesión</span>
         </button>
-        
-        <div class="mt-6 text-center text-stone-700 font-fauna">
-          <p>¿No tienes una cuenta? <router-link to="/register" class="text-stone-600 hover:text-stone-800 font-medium">Regístrate</router-link></p>
-        </div>
       </form>
     </div>
   </div>
 </template>
 
 <script>
-import AuthService from '../services/auth.service';
+import { useAuthStore } from '../store/authStore';
 
 export default {
   name: 'Login',
@@ -60,49 +56,41 @@ export default {
         email: '',
         password: ''
       },
-      loading: false,
       message: '',
       isError: false
     };
+  },
+  computed: {
+    authStore() {
+      return useAuthStore();
+    },
+    loading() {
+      return this.authStore.loading;
+    }
   },
   methods: {
     async handleLogin() {
       if (!this.user.email || !this.user.password) {
         this.message = 'Por favor, complete todos los campos';
         this.isError = true;
-        console.warn('Login Component: Campos incompletos');
         return;
       }
       
-      this.loading = true;
       this.message = '';
-      
-      console.log('Login Component: Intentando iniciar sesión con:', { 
-        email: this.user.email,
-        password: '*'.repeat(this.user.password.length)
-      });
+      this.isError = false;
       
       try {
-        const response = await AuthService.login(this.user.email, this.user.password);
-        console.log('Login Component: Inicio de sesión exitoso, datos recibidos:', response);
-        console.log('Login Component: Redirigiendo a la página principal');
+        await this.authStore.login(this.user.email, this.user.password);
         
-        this.$router.push('/');
         this.message = 'Inicio de sesión exitoso';
-        this.isError = false;
+        setTimeout(() => {
+          this.$router.push('/dashboard');
+        }, 500);
+        
       } catch (error) {
         this.isError = true;
-        console.error('Login Component: Error durante el inicio de sesión:', error);
-        
-        if (error.response) {
-          this.message = error.response.data.message || 'Error al iniciar sesión';
-          console.error('Login Component: Mensaje de error del servidor:', error.response.data);
-        } else {
-          this.message = 'Error de conexión con el servidor';
-          console.error('Login Component: Error:', error);
-        }
-      } finally {
-        this.loading = false;
+        this.message = error.message;
+        this.user.password = '';
       }
     }
   }

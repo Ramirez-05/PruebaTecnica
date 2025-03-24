@@ -45,17 +45,45 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
         try {
             $data = json_decode(file_get_contents('php://input'), true);
             
-            if (isset($data['password'])) {
-                $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            if (!is_array($data)) {
+                throw new Exception('Datos de entrada inválidos.');
             }
             
-            echo json_encode($clientController->update($id, $data));
+            $updateData = [];
+            
+            // Validar email si está presente
+            if (isset($data['email'])) {
+                $updateData['email'] = trim($data['email']); 
+                
+                if (!filter_var($updateData['email'], FILTER_VALIDATE_EMAIL)) {
+                    throw new Exception('El formato del correo electrónico no es válido.');
+                }
+            }
+            
+            // Validar nombre si está presente
+            if (isset($data['name'])) {
+                $updateData['name'] = trim($data['name']);
+                
+                if (empty($updateData['name'])) {
+                    throw new Exception('El nombre no puede estar vacío.');
+                }
+            }
+            
+            // Asegurarse de que al menos un campo se va a actualizar
+            if (empty($updateData)) {
+                throw new Exception('No se especificaron campos para actualizar.');
+            }
+            
+            $result = $clientController->update($id, $updateData);
+            header('Content-Type: application/json');
+            echo json_encode($result);
         } catch (Exception $e) {
             http_response_code(400);
+            header('Content-Type: application/json');
             echo json_encode(['error' => $e->getMessage()]);
         }
     });
-
+    
     // Eliminar un cliente
     Router::delete('/clients/{id}', function ($id) use ($clientController) {
         try {
