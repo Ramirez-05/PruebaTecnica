@@ -8,9 +8,14 @@ use Exception;
 
 class JwtService
 {
-    // Generar un token JWT
     public static function generateToken($userId)
     {
+        $userId = (int)$userId;
+        
+        if (!$userId) {
+            throw new Exception('ID de usuario inválido');
+        }
+        
         $payload = [
             'iss' => 'aplication',
             'sub' => $userId,
@@ -21,7 +26,6 @@ class JwtService
         return JWT::encode($payload, self::getSecretKey(), self::getAlgorithm());
     }
 
-    // Validar un token JWT
     public static function validateToken($token)
     {
         try {

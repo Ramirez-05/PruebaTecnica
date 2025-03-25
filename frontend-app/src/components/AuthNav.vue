@@ -1,96 +1,164 @@
 <template>
-  <nav class="fixed w-full bg-stone-900 bg-opacity-90 shadow-xl z-50 border-b-4 border-stone-700">
-    <div class="container mx-auto px-4">
-      <div class="flex justify-between items-center h-16">
-        <router-link to="/dashboard" class="flex items-center space-x-2">
-          <span class="text-2xl font-bold text-stone-300 font-cinzel tracking-wider">SR</span>
-        </router-link>
-        
-        <div class="hidden md:flex items-center space-x-6">
+  <nav class="bg-stone-800 text-white p-4 fixed w-full z-10">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="text-2xl font-bold font-cinzel">
+        <span class="text-amber-500">SR</span>
+      </div>
+
+      <div class="hidden md:flex space-x-6">
+        <template v-if="!isDashboard">
+          <router-link 
+            v-if="!isAuthenticated" 
+            to="/" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+          >
+            Inicio
+          </router-link>
+        </template>
+
+        <template v-if="isAuthenticated">
+          <router-link 
+            to="/dashboard" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': isDashboard}"
+          >
+            Dashboard
+          </router-link>
+          
           <router-link 
             to="/profile" 
-            class="nav-link"
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': $route.path === '/profile'}"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
             Perfil
           </router-link>
           
           <button 
-            @click="handleLogout" 
-            class="nav-link"
+            @click="logout" 
+            class="hover:text-amber-400 transition-colors font-fauna cursor-pointer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
             Cerrar Sesión
           </button>
-        </div>
-        
-        <div class="md:hidden">
-          <button @click="toggleMobileMenu" class="text-stone-300 hover:text-white">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        </template>
+
+        <template v-else>
+          <router-link 
+            to="/login" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': $route.path === '/login'}"
+          >
+            Login
+          </router-link>
+          
+          <router-link 
+            to="/register" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': $route.path === '/register'}"
+          >
+            Registro
+          </router-link>
+        </template>
       </div>
+
+      <button @click="toggleMobileMenu" class="md:hidden text-2xl">
+        <span v-if="!mobileMenuOpen">☰</span>
+        <span v-else>✕</span>
+      </button>
     </div>
-    
-    <div v-if="mobileMenuOpen" class="md:hidden bg-stone-900 bg-opacity-95 border-t border-stone-700">
-      <div class="px-4 py-3 space-y-3">
-        <router-link 
-          to="/profile" 
-          class="block text-stone-300 hover:text-white py-2 flex items-center"
-          @click="mobileMenuOpen = false"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          Perfil
-        </router-link>
-        
-        <button 
-          @click="handleLogout" 
-          class="block text-stone-300 hover:text-white py-2 w-full text-left flex items-center"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Cerrar Sesión
-        </button>
+
+    <div v-if="mobileMenuOpen" class="md:hidden bg-stone-800 p-4">
+      <div class="flex flex-col space-y-3">
+        <template v-if="!isDashboard">
+          <router-link 
+            v-if="!isAuthenticated" 
+            to="/" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            @click="closeMobileMenu"
+          >
+            Inicio
+          </router-link>
+        </template>
+
+        <template v-if="isAuthenticated">
+          <router-link 
+            to="/dashboard" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': isDashboard}"
+            @click="closeMobileMenu"
+          >
+            Dashboard
+          </router-link>
+          
+          <router-link 
+            to="/profile" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': $route.path === '/profile'}"
+            @click="closeMobileMenu"
+          >
+            Perfil
+          </router-link>
+          
+          <button 
+            @click="logoutAndCloseMobile" 
+            class="hover:text-amber-400 transition-colors font-fauna text-left cursor-pointer"
+          >
+            Cerrar Sesión
+          </button>
+        </template>
+
+        <template v-else>
+          <router-link 
+            to="/login" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': $route.path === '/login'}"
+            @click="closeMobileMenu"
+          >
+            Login
+          </router-link>
+          
+          <router-link 
+            to="/register" 
+            class="hover:text-amber-400 transition-colors font-fauna"
+            :class="{'text-amber-400': $route.path === '/register'}"
+            @click="closeMobileMenu"
+          >
+            Registro
+          </router-link>
+        </template>
       </div>
     </div>
   </nav>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/authStore';
 
-export default {
-  name: 'AuthNav',
-  data() {
-    return {
-      mobileMenuOpen: false
-    };
-  },
-  computed: {
-    authStore() {
-      return useAuthStore();
-    }
-  },
-  methods: {
-    toggleMobileMenu() {
-      this.mobileMenuOpen = !this.mobileMenuOpen;
-    },
-    handleLogout() {
-      this.authStore.logout();
-      this.mobileMenuOpen = false;
-    }
-  }
-}
+const router = useRouter();
+const authStore = useAuthStore();
+const mobileMenuOpen = ref(false);
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const isDashboard = computed(() => router.currentRoute.value.path === '/dashboard');
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false;
+};
+
+const logout = () => {
+  authStore.logout();
+  router.push('/');
+};
+
+const logoutAndCloseMobile = () => {
+  closeMobileMenu();
+  logout();
+};
 </script>
 
 <style scoped>

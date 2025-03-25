@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../constants/apiEndpoints';
+import { useAuthStore } from '../store/authStore';
+import { useRouter } from 'vue-router';
 
 const api = axios.create({
   baseURL: API_BASE_URL, 
@@ -10,7 +12,6 @@ const api = axios.create({
   }
 });
 
-// Interceptor para manejar tokens de autenticación
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');
@@ -27,7 +28,6 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para manejar errores comunes
 api.interceptors.response.use(
   response => {
     if (typeof response.data === 'string' && response.data.endsWith('null')) {
@@ -41,16 +41,14 @@ api.interceptors.response.use(
     return response;
   },
   error => {
-    
-    if (error.response) {
-      if (error.response.status === 401 && 
-          !window.location.pathname.includes('/login') &&
-          !window.location.pathname.includes('/register')) {
-        localStorage.removeItem('token');
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
     }
-    
     return Promise.reject(error);
   }
 );

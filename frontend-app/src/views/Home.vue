@@ -13,13 +13,8 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          <div class="feature-card">
-            <div class="text-stone-600 mb-4">
-              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-4 text-stone-800 font-cinzel">Backend Development</h3>
+          <div class="bg-stone-100 p-6 rounded-lg shadow-md border-2 border-stone-500 h-full">
+            <h3 class="text-xl font-semibold mb-4 text-stone-800 font-cinzel">Tecnologías Backend</h3>
             <ul class="space-y-3 text-stone-700 font-fauna">
               <li class="flex items-start">
                 <svg class="w-5 h-5 text-stone-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,36 +32,43 @@
                 <svg class="w-5 h-5 text-stone-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                 </svg>
+                <span>Inyección de Dependencias</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-stone-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                </svg>
                 <span>Creación de APIs</span>
               </li>
             </ul>
           </div>
 
-          <div class="feature-card">
-            <div class="text-stone-600 mb-4">
-              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-4 text-stone-800 font-cinzel">Frontend Development</h3>
+          <div class="bg-stone-100 p-6 rounded-lg shadow-md border-2 border-stone-500 h-full">
+            <h3 class="text-xl font-semibold mb-4 text-stone-800 font-cinzel">Tecnologías Frontend</h3>
             <ul class="space-y-3 text-stone-700 font-fauna">
               <li class="flex items-start">
                 <svg class="w-5 h-5 text-stone-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                 </svg>
-                <span>Vue.js 3 con Composition API</span>
+                <span>Vue.js como framework principal de UI</span>
               </li>
               <li class="flex items-start">
                 <svg class="w-5 h-5 text-stone-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                 </svg>
-                <span>Diseño Responsive con Tailwind CSS</span>
+                <span>Pinia para gestión de estado de la aplicación</span>
               </li>
               <li class="flex items-start">
                 <svg class="w-5 h-5 text-stone-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                 </svg>
-                <span>Experiencia de Usuario Intuitiva</span>
+                <span>Axios para peticiones HTTP y comunicación con la API</span>
+              </li>
+              <li class="flex items-start">
+                <svg class="w-5 h-5 text-stone-600 mr-2 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+                </svg>
+                <span>TailwindCSS para estilizado y diseño responsivo</span>
               </li>
             </ul>
           </div>

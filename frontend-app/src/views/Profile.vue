@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-4 pt-24">
-    <loading-spinner v-if="loading" message="Cargando datos..."/>
+    <loading-spinner v-if="loading" message="Cargando datos del perfil..."/>
     
     <error-message 
       v-else-if="error" 
@@ -8,32 +8,23 @@
       @retry="loadProfile"
     />
     
-    <div v-else class="max-w-2xl mx-auto">
-      <h1 class="text-3xl font-bold text-stone-800 mb-6 font-cinzel text-center">
+    <div v-else class="max-w-4xl mx-auto">
+      <h1 class="text-3xl md:text-5xl font-bold text-stone-800 mb-10 font-cinzel text-center">
         Perfil de Usuario
       </h1>
       
-      <div class="space-y-6">
+      <div class="grid grid-cols-1 gap-8">
         <user-info-card 
-          :user-name="authStore.userName"
+          :user-name="authStore.userName" 
           :user-email="authStore.userEmail"
           :user-id="authStore.userId"
-          :user-data="displayableUserData"
           :format-key="formatKey"
         />
         
         <account-options-card 
           @edit="showEditForm = true"
-          @delete="confirmDelete"
         />
       </div>
-      
-      <delete-confirmation-modal 
-        v-if="showDeleteModal"
-        :deleting="deleting"
-        @cancel="showDeleteModal = false"
-        @confirm="deleteAccount"
-      />
       
       <edit-profile-modal
         v-if="showEditForm"
@@ -52,7 +43,6 @@ import LoadingSpinner from '../components/common/LoadingSpinner.vue';
 import ErrorMessage from '../components/common/ErrorMessage.vue';
 import UserInfoCard from '../components/profile/UserInfoCard.vue';
 import AccountOptionsCard from '../components/profile/AccountOptionsCard.vue';
-import DeleteConfirmationModal from '../components/profile/DeleteConfirmationModal.vue';
 import EditProfileModal from '../components/profile/EditProfileModal.vue';
 
 export default {
@@ -62,7 +52,6 @@ export default {
     ErrorMessage,
     UserInfoCard,
     AccountOptionsCard,
-    DeleteConfirmationModal,
     EditProfileModal
   },
   data() {
@@ -70,9 +59,7 @@ export default {
       loading: true,
       userData: null,
       error: null,
-      showDeleteModal: false,
-      showEditForm: false,
-      deleting: false
+      showEditForm: false
     };
   },
   computed: {
@@ -82,7 +69,7 @@ export default {
     displayableUserData() {
       if (!this.userData) return {};
       
-      const { id, email, password, ...rest } = this.userData;
+      const { id, email, password, _password, status, data, ...rest } = this.userData;
       return rest;
     }
   },
@@ -105,26 +92,16 @@ export default {
           return;
         }
         
+        console.log('Cargando datos del usuario...');
         this.userData = await this.authStore.fetchUserData();
+        console.log('Datos del usuario cargados:', this.userData);
+        console.log('Nombre del usuario:', this.authStore.userName);
+        console.log('Email del usuario:', this.authStore.userEmail);
       } catch (error) {
+        console.error('Error al cargar el perfil:', error);
         this.error = error.message || 'Error al obtener datos del perfil';
       } finally {
         this.loading = false;
-      }
-    },
-    confirmDelete() {
-      this.showDeleteModal = true;
-    },
-    async deleteAccount() {
-      this.deleting = true;
-      try {
-        await this.authStore.deleteAccount();
-        this.$router.push('/login');
-      } catch (error) {
-        this.error = error.message || 'Error al eliminar la cuenta. Por favor, intente nuevamente.';
-        this.showDeleteModal = false;
-      } finally {
-        this.deleting = false;
       }
     },
     handleProfileUpdated() {

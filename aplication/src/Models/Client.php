@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Client extends Model
 {
     protected $table = 'clients';
+    protected $primaryKey = 'id_cliente';
     protected $fillable = ['name', 'email', 'password'];
     public $timestamps = false; 
 
@@ -17,6 +18,11 @@ class Client extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class, 'client_product', 'client_id', 'product_id');
+        return $this->belongsToMany(
+            Product::class, 
+            'client_product', 
+            'id_cliente', 
+            'id_producto'
+        );
     }
 }

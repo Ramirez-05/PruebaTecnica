@@ -85,19 +85,29 @@ class OrderService
             DB::beginTransaction();
             
             $order = new Order();
-            $order->client_id = $clientId;
+            $order->id_cliente = $clientId;
             $order->created_at = date('Y-m-d H:i:s');
             $order->save();
             
             foreach ($productsToOrder as $item) {
+                $product = DB::table('products')
+                    ->where('id_producto', $item['product']->id_producto)
+                    ->lockForUpdate()
+                    ->first();
+                
+                if ($product->stock < $item['quantity']) {
+                    throw new Exception("Stock insuficiente para el producto ID: {$item['product']->id_producto}");
+                }
+                
                 $orderDetail = new OrderDetail();
-                $orderDetail->order_id = $order->id;
-                $orderDetail->product_id = $item['product']->id;
+                $orderDetail->id_pedido = $order->id_pedido;
+                $orderDetail->id_producto = $item['product']->id_producto;
                 $orderDetail->quantity = $item['quantity'];
                 $orderDetail->save();
                 
-                $item['product']->stock -= $item['quantity'];
-                $item['product']->save();
+                DB::table('products')
+                    ->where('id_producto', $item['product']->id_producto)
+                    ->update(['stock' => $product->stock - $item['quantity']]);
             }
             
             DB::commit();
@@ -136,7 +146,7 @@ class OrderService
     public function getOrdersByClientId($clientId)
     {
         return Order::with('details.product')
-            ->where('client_id', $clientId)
+            ->where('id_cliente', $clientId)
             ->get();
     }
     
@@ -148,5 +158,17 @@ class OrderService
     public function getAllOrders()
     {
         return Order::with(['details.product', 'client'])->get();
+    }
+    
+    public function getOrdersByClient($clientId)
+    {
+        return DB::table('orders as o')
+            ->select(DB::raw('o.*, GROUP_CONCAT(CONCAT(p.nombre, " (", od.quantity, ")") SEPARATOR ", ") as productos'))
+            ->leftJoin('order_details as od', 'o.id_pedido', '=', 'od.id_pedido')
+            ->leftJoin('products as p', 'od.id_producto', '=', 'p.id_producto')
+            ->where('o.id_cliente', $clientId)
+            ->groupBy('o.id_pedido')
+            ->orderByDesc('o.created_at')
+            ->get();
     }
 } 

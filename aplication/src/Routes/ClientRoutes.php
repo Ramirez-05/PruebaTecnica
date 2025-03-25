@@ -1,27 +1,28 @@
 <?php
 use Pecee\SimpleRouter\SimpleRouter as Router;
-use Xyz\PruebaTecnica\Controllers\ClientController;
+use Xyz\PruebaTecnica\Core\ServiceConfig;
 use Xyz\PruebaTecnica\Middlewares\AuthMiddleware;
 
-$clientController = new ClientController();
 $authMiddleware = new AuthMiddleware();
 
-Router::group(['middleware' => [$authMiddleware]], function() use ($clientController) {
+Router::group(['middleware' => [$authMiddleware]], function() {
     
-    Router::get('/clients', function() use ($clientController) {
-        echo json_encode($clientController->index());
+    Router::get('/clients', function() {
+        $controller = ServiceConfig::getController('client_controller');
+        echo json_encode($controller->index());
     });
 
-    Router::get('/clients/{id}', function($id) use ($clientController) {
+    Router::get('/clients/{id}', function($id) {
         try {
-            echo json_encode($clientController->show($id));
+            $controller = ServiceConfig::getController('client_controller');
+            echo json_encode($controller->show($id));
         } catch (Exception $e) {
             http_response_code(404);
             echo json_encode(['error' => $e->getMessage()]);
         }
     });
 
-    Router::post('/clients', function() use ($clientController) {
+    Router::post('/clients', function() {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
             
@@ -29,14 +30,15 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
                 $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
             }
             
-            echo json_encode($clientController->store($data));
+            $controller = ServiceConfig::getController('client_controller');
+            echo json_encode($controller->store($data));
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode(['error' => $e->getMessage()]);
         }
     });
 
-    Router::put('/clients/{id}', function ($id) use ($clientController) {
+    Router::put('/clients/{id}', function ($id) {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
             
@@ -66,7 +68,8 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
                 throw new Exception('No se especificaron campos para actualizar.');
             }
             
-            $result = $clientController->update($id, $updateData);
+            $controller = ServiceConfig::getController('client_controller');
+            $result = $controller->update($id, $updateData);
             header('Content-Type: application/json');
             echo json_encode($result);
         } catch (Exception $e) {
@@ -76,9 +79,10 @@ Router::group(['middleware' => [$authMiddleware]], function() use ($clientContro
         }
     });
 
-    Router::delete('/clients/{id}', function ($id) use ($clientController) {
+    Router::delete('/clients/{id}', function ($id) {
         try {
-            $result = $clientController->destroy($id);
+            $controller = ServiceConfig::getController('client_controller');
+            $result = $controller->destroy($id);
             echo json_encode(['success' => $result]);
         } catch (Exception $e) {
             http_response_code(404);

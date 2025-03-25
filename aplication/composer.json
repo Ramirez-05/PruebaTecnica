@@ -27,6 +27,6 @@
         "serve": [
             "php scripts/serve.php"
         ],
-        "start": "@serve"
+        "start": "php -S localhost:8000 -t public"
     }
 }

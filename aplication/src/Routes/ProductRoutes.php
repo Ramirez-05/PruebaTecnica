@@ -6,7 +6,7 @@ use Xyz\PruebaTecnica\Middlewares\AuthMiddleware;
 
 ServiceConfig::registerServices();
 
-Router::group(['prefix' => '/api/products', 'middleware' => [AuthMiddleware::class]], function() {
+Router::group(['prefix' => '/products', 'middleware' => [AuthMiddleware::class]], function() {
     
     Router::get('/available/client/{id}', function($id) {
         $controller = ServiceConfig::getController('product_controller');   

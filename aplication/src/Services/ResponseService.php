@@ -3,6 +3,8 @@
 namespace Xyz\PruebaTecnica\Services;
 
 use Pecee\Http\Response;
+use Pecee\Http\Request;
+use Pecee\SimpleRouter\SimpleRouter as Router;
 
 class ResponseService
 {
@@ -10,7 +12,8 @@ class ResponseService
     
     public function __construct()
     {
-        $this->response = new Response();
+        $request = Router::router()->getRequest();
+        $this->response = new Response($request);
     }
     
     /**

@@ -39,15 +39,23 @@ export const useAuthStore = defineStore('auth', {
       this._error = null;
       
       try {
+        console.log('Intentando login con:', email);
         const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
-        if (response.data.token) {
-          this._token = response.data.token;
-          localStorage.setItem('token', response.data.token);
+        
+        console.log('Respuesta completa del servidor:', response);
+        console.log('Datos de respuesta:', response.data);
+        console.log('Tipo de datos:', typeof response.data);
+        
+        const responseData = response.data.data || response.data;
+        
+        if (responseData.token) {
+          this._token = responseData.token;
+          localStorage.setItem('token', responseData.token);
           
-          if (response.data.user_id) {
-            this._user = { id: response.data.user_id };
+          if (responseData.user_id) {
+            this._user = { id: responseData.user_id };
             localStorage.setItem('user', JSON.stringify(this._user));
-
+            
             try {
               await this.fetchUserData();
             } catch (fetchError) {
@@ -55,11 +63,18 @@ export const useAuthStore = defineStore('auth', {
             }
           }
           
-          return response.data;
+          return responseData;
         } else {
           throw new Error('No se recibió token en la respuesta');
         }
       } catch (error) {
+        console.error('Error completo:', error);
+        
+        if (error.response) {
+          console.error('Respuesta de error:', error.response);
+          console.error('Datos de error:', error.response.data);
+        }
+        
         let errorMessage = 'Error de conexión';
         
         if (error.response) {
@@ -103,10 +118,13 @@ export const useAuthStore = defineStore('auth', {
     },
     
     logout() {
+      console.log('AuthStore: Cerrando sesión');
       this._token = null;
       this._user = null;
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      
+      router.push('/');
     },
     
     clearError() {
@@ -115,6 +133,7 @@ export const useAuthStore = defineStore('auth', {
     
     async fetchUserData() {
       if (!this._user || !this._user.id) {
+        console.error('No hay usuario autenticado o no tiene ID');
         throw new Error('No hay usuario autenticado');
       }
       
@@ -122,21 +141,29 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         const userId = this._user.id;
+        console.log('Obteniendo datos para el usuario ID:', userId);
         const clientData = await clientService.getClientById(userId);
+        console.log('Datos obtenidos del cliente:', clientData);
         
         if (clientData) {
+          const userData = clientData.data || clientData;
+          
           this._user = {
             ...this._user,
-            ...clientData,
-            id: this._user.id,
+            ...userData,
+            name: userData.name || userData.nombre || this._user.name || 'No disponible',
+            email: userData.email || userData.correo || this._user.email || 'No disponible',
+            id: this._user.id
           };
           
+          console.log('Usuario actualizado:', this._user);
           localStorage.setItem('user', JSON.stringify(this._user));
           return this._user;
         } else {
           throw new Error('No se pudieron obtener los datos del cliente');
         }
       } catch (error) {
+        console.error('Error al obtener datos del usuario:', error);
         this._error = error.message;
         throw error;
       } finally {
@@ -233,9 +260,12 @@ export const useAuthStore = defineStore('auth', {
         }
         
         const updateData = {
-          name: newName,
-          email: newEmail
+          name: newName
         };
+        
+        if (newEmail !== this._user.email) {
+          updateData.email = newEmail;
+        }
         
         const updatedUser = await clientService.updateClient(userId, updateData);
         
@@ -243,7 +273,7 @@ export const useAuthStore = defineStore('auth', {
           this._user = {
             ...this._user,
             name: newName,
-            email: newEmail
+            ...(newEmail !== this._user.email ? { email: newEmail } : {})
           };
           
           localStorage.setItem('user', JSON.stringify(this._user));
@@ -260,25 +290,13 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
-    async deleteAccount() {
-      if (!this._user || !this._user.id) {
-        throw new Error('No hay usuario autenticado');
-      }
-      
-      this._loading = true;
-      
-      try {
-        const userId = this._user.id;
-        await clientService.deleteClient(userId);
-        this.logout();
-        
-        return true;
-      } catch (error) {
-        this._error = error.message;
-        throw error;
-      } finally {
-        this._loading = false;
-      }
+    clearSession() {
+      this._token = null;
+      this._user = null;
+      this._error = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('user_id');
     }
   }
 });

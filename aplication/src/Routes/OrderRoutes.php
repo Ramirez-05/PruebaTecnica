@@ -4,7 +4,7 @@ use Pecee\SimpleRouter\SimpleRouter as Router;
 use Xyz\PruebaTecnica\Core\ServiceConfig;
 use Xyz\PruebaTecnica\Middlewares\AuthMiddleware;
 
-Router::group(['prefix' => '/api/orders', 'middleware' => [AuthMiddleware::class]], function() {
+Router::group(['prefix' => '/orders', 'middleware' => [AuthMiddleware::class]], function() {
     
     Router::get('/', function() {
         $controller = ServiceConfig::getController('order_controller');

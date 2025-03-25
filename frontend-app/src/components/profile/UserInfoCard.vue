@@ -6,10 +6,7 @@
         <span class="font-semibold">Nombre:</span> {{ userName || 'No disponible' }}
       </p>
       <p class="text-stone-700 font-fauna">
-        <span class="font-semibold">Email:</span> {{ userEmail }}
-      </p>
-      <p class="text-stone-700 font-fauna">
-        <span class="font-semibold">ID de Usuario:</span> {{ userId }}
+        <span class="font-semibold">Email:</span> {{ userEmail || 'No disponible' }}
       </p>
       <div v-if="userData && Object.keys(userData).length > 0" class="mt-4 space-y-2">
         <p v-for="(value, key) in userData" :key="key" class="text-stone-700 font-fauna">
@@ -33,7 +30,7 @@ export default {
       default: 'No disponible'
     },
     userId: {
-      type: String,
+      type: [String, Number],
       default: 'No disponible'
     },
     userData: {

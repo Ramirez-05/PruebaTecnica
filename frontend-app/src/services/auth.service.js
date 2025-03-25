@@ -5,17 +5,20 @@ class AuthService {
   async login(email, password) {
     try {
       const response = await api.post(API_ENDPOINTS.LOGIN, { email, password });
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+      
+      const responseData = response.data.data || response.data;
+      
+      if (responseData.token) {
+        localStorage.setItem('token', responseData.token);
 
-        if (response.data.user_id) {
-          localStorage.setItem('user_id', response.data.user_id);
+        if (responseData.user_id) {
+          localStorage.setItem('user_id', responseData.user_id);
         }
       } else {
         console.warn('Login: No se recibió token en la respuesta');
       }
       
-      return response.data;
+      return responseData;
     } catch (error) {
       let errorMessage = 'Error en la conexión con el servidor';
       if (error.response) {

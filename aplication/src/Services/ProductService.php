@@ -15,7 +15,7 @@ class ProductService
      */
     public function getClientById($clientId)
     {
-        return Client::where('id', $clientId)->first();
+        return Client::where('id_cliente', $clientId)->first();
     }
     
     /**
@@ -28,10 +28,10 @@ class ProductService
     {
         $availableProducts = Product::where('stock', '>', 0)->get();
         
-        $clientProducts = $client->products()->pluck('product_id')->toArray();
+        $clientProducts = $client->products()->pluck('products.id_producto')->toArray();
         
         return $availableProducts->filter(function($product) use ($clientProducts) {
-            return !in_array($product->id, $clientProducts);
+            return !in_array($product->id_producto, $clientProducts);
         })->values();
     }
 } 
